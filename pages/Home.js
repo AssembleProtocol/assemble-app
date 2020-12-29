@@ -26,9 +26,9 @@ const injectingJavascript = `
       };
       window.ReactNativeWebView.postMessage(JSON.stringify(obj));
     },
-    test: function() {
+    openQrScanner: function() {
       const obj = {
-        event: 'test'
+        event: 'openQrScanner'
       };
       window.ReactNativeWebView.postMessage(JSON.stringify(obj));
     }
@@ -44,12 +44,12 @@ class Home extends React.Component {
     };
   }
 
-  handleMessage = ({ nativeEvent }) => {
+  handleMessage = async ({ nativeEvent }) => {
     const { data } = nativeEvent;
     const { event, value } = JSON.parse(data);
 
     if (event === 'openInAppBrowser') WebBrowser.openBrowserAsync(value);
-    if (event === 'test') this.openModal();
+    else if (event === 'openQrScanner') this.openModal();
   }
 
   handleNavigationStateChange = ({

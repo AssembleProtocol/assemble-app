@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Constants from 'expo-constants';
 import { WebView } from 'react-native-webview';
 import * as WebBrowser from 'expo-web-browser';
@@ -15,6 +15,11 @@ const statusBarHeight = Constants.statusBarHeight;
 const Container = styled.View`
   flex: 1;
   padding-top: ${statusBarHeight}px;
+  background-color: #fff;
+
+  ${props => props.dark && css`
+    background-color: #000;
+  `}
 `;
 
 const injectingJavascript = `
@@ -40,6 +45,8 @@ class Home extends React.Component {
     super();
 
     this.state = {
+      dark: false,
+      barStyle: 'dark-content',
       modalVisible: false,
     };
   }
@@ -61,7 +68,11 @@ class Home extends React.Component {
   }) => {
     if (!url) return;
     const { pathname } = URL.parse(url);
-    // if (pathname.indexOf('/exchange-center') === 0)
+    if (pathname.indexOf('/exchange-center') === 0) {
+      this.setState({ dark: true, barStyle: 'light-content' });
+    } else {
+      this.setState({ dark: false, barStyle: 'dark-content' });
+    }
   }
 
   openModal = () => {
@@ -83,8 +94,8 @@ class Home extends React.Component {
 
   render() {
     return (
-      <Container>
-        <StatusBar barStyle="dark-content"/>
+      <Container dark={this.state.dark}>
+        <StatusBar barStyle={this.state.barStyle}/>
         <WebView
           source={{ uri: 'http://192.168.50.168:8080' }}
           injectedJavaScript={injectingJavascript}

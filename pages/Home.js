@@ -22,6 +22,22 @@ const Container = styled.View`
   `}
 `;
 
+const CloseButton = styled.TouchableOpacity`
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  z-index: 999;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, .6);
+`;
+
+const CloseButtonText = styled.Text`
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+`;
+
 const injectingJavascript = `
   window.s3app = {
     openInAppBrowser: function(url) {
@@ -114,10 +130,13 @@ class Home extends React.Component {
           ref={o => this.webviewRef = o}
         />
         <Modal
-          style={{ margin: 0 }}
+          style={{ margin: 0, position: 'relative' }}
           isVisible={this.state.modalVisible}
           onBackButtonPress={this.closeModal}
         >
+          <CloseButton onPress={this.closeModal}>
+            <CloseButtonText>닫기</CloseButtonText>
+          </CloseButton>
           <QrScanner
             complete={this.completeQrScanning}
           />

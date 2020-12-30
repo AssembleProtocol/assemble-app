@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusBar } from 'react-native';
+import { Share, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import styled, { css } from 'styled-components';
 import Constants from 'expo-constants';
@@ -36,7 +36,14 @@ const injectingJavascript = `
         event: 'openQrScanner'
       };
       window.ReactNativeWebView.postMessage(JSON.stringify(obj));
-    }
+    },
+    share: function(text) {
+      const obj = {
+        event: 'share',
+        value: text
+      };
+      window.ReactNativeWebView.postMessage(JSON.stringify(obj));
+    },
   }
 `;
 
@@ -57,6 +64,9 @@ class Home extends React.Component {
 
     if (event === 'openInAppBrowser') WebBrowser.openBrowserAsync(value);
     else if (event === 'openQrScanner') this.openModal();
+    else if (event === 'share') {
+      await Share.share({ message: value });
+    }
   }
 
   handleNavigationStateChange = ({

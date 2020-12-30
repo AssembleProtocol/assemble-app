@@ -107,7 +107,7 @@ class Home extends React.Component {
       <Container dark={this.state.dark}>
         <StatusBar barStyle={this.state.barStyle}/>
         <WebView
-          source={{ uri: 'http://192.168.50.168:8080' }}
+          source={{ uri: 'https://assemble.sta1.com' }}
           injectedJavaScript={injectingJavascript}
           onMessage={this.handleMessage}
           onNavigationStateChange={this.handleNavigationStateChange}

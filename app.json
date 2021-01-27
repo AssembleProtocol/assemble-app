@@ -1,13 +1,11 @@
 {
   "expo": {
-    "name": "assemble-app",
-    "slug": "assemble-app",
+    "name": "어셈블",
+    "slug": "assemble",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "updates": {
@@ -17,13 +15,19 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.assembleapp.assemble",
+      "supportsTablet": false,
+      "icon": "./assets/icon.png",
+      "buildNumber": "1.0.0"
     },
     "android": {
+      "icon": "./assets/icon.png",
+      "package": "com.assembleapp.assemble",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"

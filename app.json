@@ -23,10 +23,6 @@
     "android": {
       "icon": "./assets/icon.png",
       "package": "com.assembleapp.assemble",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
       "versionCode": 1
     },
     "web": {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share, StatusBar } from 'react-native';
+import { BackHandler, Share, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import styled, { css } from 'styled-components';
 import Constants from 'expo-constants';
@@ -40,6 +40,13 @@ const CloseButtonText = styled.Text`
 
 const injectingJavascript = `
   window.s3app = {
+    onRouteNameChange: function(to) {
+      const obj = {
+        event: 'onRouteNameChange',
+        value: to
+      };
+      window.ReactNativeWebView.postMessage(JSON.stringify(obj));
+    },
     openInAppBrowser: function(url) {
       const obj = {
         event: 'openInAppBrowser',
@@ -68,36 +75,43 @@ class Home extends React.Component {
     super();
 
     this.state = {
+      routeName: null,
       dark: false,
-      barStyle: 'dark-content',
+      barStyle: 'default',
       modalVisible: false,
     };
+  }
+
+  componentDidMount = () => {
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+  }
+
+  handleBackButton = () => {
+    if (this.state.routeName !== 'Home') {
+      this.webviewRef.goBack();
+      return true;
+    }
   }
 
   handleMessage = async ({ nativeEvent }) => {
     const { data } = nativeEvent;
     const { event, value } = JSON.parse(data);
 
-    if (event === 'openInAppBrowser') WebBrowser.openBrowserAsync(value);
+    if (event === 'onRouteNameChange') this.onRouteNameChange(value);
+    else if (event === 'openInAppBrowser') WebBrowser.openBrowserAsync(value);
     else if (event === 'openQrScanner') this.openModal();
     else if (event === 'share') {
       await Share.share({ message: value });
     }
   }
 
-  handleNavigationStateChange = ({
-    url,
-    title,
-    loading,
-    canGoBack,
-    canGoForward,
-  }) => {
-    if (!url) return;
-    const { pathname } = URL.parse(url);
-    if (pathname.indexOf('/exchange-center') === 0) {
+  onRouteNameChange = (to) => {
+    const { name, path } = to;
+    this.setState({ routeName: name });
+    if (path.indexOf('/exchange-center') === 0) {
       this.setState({ dark: true, barStyle: 'light-content' });
     } else {
-      this.setState({ dark: false, barStyle: 'dark-content' });
+      this.setState({ dark: false, barStyle: 'default' });
     }
   }
 
@@ -111,7 +125,6 @@ class Home extends React.Component {
 
   completeQrScanning = (data) => {
     if (!data) return;
-    console.log(data);
     this.webviewRef.injectJavaScript(`window.s3app.scannedAddress = '${data}'`);
     setTimeout(() => {
       this.closeModal();
@@ -126,7 +139,6 @@ class Home extends React.Component {
           source={{ uri: 'https://assemble.sta1.com' }}
           injectedJavaScript={injectingJavascript}
           onMessage={this.handleMessage}
-          onNavigationStateChange={this.handleNavigationStateChange}
           ref={o => this.webviewRef = o}
         />
         <Modal

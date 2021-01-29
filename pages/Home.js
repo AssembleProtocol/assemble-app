@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackHandler, Share, StatusBar } from 'react-native';
+import { BackHandler, Share, StatusBar, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import styled, { css } from 'styled-components';
 import Constants from 'expo-constants';
@@ -83,7 +83,7 @@ class Home extends React.Component {
   }
 
   componentDidMount = () => {
-    BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    if (Platform.OS === 'android') BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
   }
 
   handleBackButton = () => {

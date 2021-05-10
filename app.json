@@ -2,7 +2,7 @@
   "expo": {
     "name": "어셈블",
     "slug": "assemble",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -18,12 +18,12 @@
       "bundleIdentifier": "com.assembleapp.assemble",
       "supportsTablet": false,
       "icon": "./assets/icon.png",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.2"
     },
     "android": {
       "icon": "./assets/icon.png",
       "package": "com.assembleapp.assemble",
-      "versionCode": 1
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 import { WebView } from 'react-native-webview';
 import * as WebBrowser from 'expo-web-browser';
 import Modal from 'react-native-modal';
-import URL from 'url';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import QrScanner from 'components/QrScanner';
 
@@ -14,11 +14,14 @@ const statusBarHeight = Constants.statusBarHeight;
 
 const Container = styled.View`
   flex: 1;
-  padding-top: ${statusBarHeight}px;
+  padding-top: ${props => props.insetTop}px;
   background-color: #fff;
 
   ${props => props.dark && css`
     background-color: #000;
+  `}
+  ${props => props.translucent && css`
+    padding-top: 0px;
   `}
 `;
 
@@ -40,6 +43,7 @@ const CloseButtonText = styled.Text`
 
 const injectingJavascript = `
   window.s3app = {
+    statusBarHeight: ${statusBarHeight},
     onRouteNameChange: function(to) {
       const obj = {
         event: 'onRouteNameChange',
@@ -78,6 +82,7 @@ class Home extends React.Component {
       routeName: null,
       dark: false,
       barStyle: 'default',
+      translucent: false,
       modalVisible: false,
     };
   }
@@ -109,9 +114,11 @@ class Home extends React.Component {
     const { name, path } = to;
     this.setState({ routeName: name });
     if (path.indexOf('/exchange-center') === 0) {
-      this.setState({ dark: true, barStyle: 'light-content' });
+      this.setState({ dark: true, barStyle: 'light-content', translucent: false });
+    } else if (path.indexOf('/store/products') === 0) {
+      this.setState({ dark: false, barStyle: 'default', translucent: true });
     } else {
-      this.setState({ dark: false, barStyle: 'default' });
+      this.setState({ dark: false, barStyle: 'default', translucent: false });
     }
   }
 
@@ -132,18 +139,20 @@ class Home extends React.Component {
   }
 
   render() {
+    const { dark, barStyle, translucent, modalVisible } = this.state;
+
     return (
-      <Container dark={this.state.dark}>
-        <StatusBar barStyle={this.state.barStyle}/>
+      <Container dark={dark} translucent={translucent} insetTop={this.props.insetTop}>
+        <StatusBar barStyle={barStyle} translucent={translucent}/>
         <WebView
-          source={{ uri: 'https://assemble.sta1.com' }}
+          source={{ uri: 'https://app.assembleprotocol.com' }}
           injectedJavaScript={injectingJavascript}
           onMessage={this.handleMessage}
           ref={o => this.webviewRef = o}
         />
         <Modal
           style={{ margin: 0, position: 'relative' }}
-          isVisible={this.state.modalVisible}
+          isVisible={modalVisible}
           onBackButtonPress={this.closeModal}
         >
           <CloseButton onPress={this.closeModal}>
@@ -160,6 +169,8 @@ class Home extends React.Component {
 
 export default function (props) {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const { top: insetTop } = insets;
 
-  return <Home {...props} navigation={navigation} />
+  return <Home {...props} navigation={navigation} insetTop={insetTop}/>
 }

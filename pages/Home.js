@@ -149,6 +149,7 @@ class Home extends React.Component {
           injectedJavaScript={injectingJavascript}
           onMessage={this.handleMessage}
           ref={o => this.webviewRef = o}
+          textZoom={100}
         />
         <Modal
           style={{ margin: 0, position: 'relative' }}

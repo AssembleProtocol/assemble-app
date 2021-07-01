@@ -7,8 +7,17 @@ import { WebView } from 'react-native-webview';
 import * as WebBrowser from 'expo-web-browser';
 import Modal from 'react-native-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
 
 import QrScanner from 'components/QrScanner';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const statusBarHeight = Constants.statusBarHeight;
 
@@ -84,11 +93,14 @@ class Home extends React.Component {
       barStyle: 'default',
       translucent: false,
       modalVisible: false,
+      expoPushToken: null,
     };
   }
 
   componentDidMount = () => {
     if (Platform.OS === 'android') BackHandler.addEventListener('hardwareBackPress', this.handleBackButton.bind(this));
+    this.registerForPushNotificationsAsync();
+    Notifications.addNotificationResponseReceivedListener(this._handleNotificationResponse);
   }
 
   handleBackButton = () => {
@@ -97,6 +109,39 @@ class Home extends React.Component {
       return true;
     }
   }
+
+  registerForPushNotificationsAsync = async () => {
+    if (!Constants.isDevice) return;
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('푸시 알림을 받지 않게 설정되었습니다.');
+      return;
+    }
+    const expoPushToken = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log(expoPushToken);
+    this.setState({ expoPushToken });
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+      });
+    }
+  }
+
+  _handleNotificationResponse = (response) => {
+    const { notification } = response;
+    const { request } = notification;
+    const { content } = request;
+    const { data } = content;
+    console.log(data);
+    this.webviewRef.injectJavaScript(`window.assembleRouter.push('/exchange-center')`);
+  };
 
   handleMessage = async ({ nativeEvent }) => {
     const { data } = nativeEvent;
@@ -145,7 +190,8 @@ class Home extends React.Component {
       <Container dark={dark} translucent={translucent} insetTop={this.props.insetTop}>
         <StatusBar barStyle={barStyle} translucent={translucent}/>
         <WebView
-          source={{ uri: 'https://app.assembleprotocol.com' }}
+          source={{ uri: 'http://192.168.50.69:8080' }}
+          // source={{ uri: 'https://app.assembleprotocol.com' }}
           injectedJavaScript={injectingJavascript}
           onMessage={this.handleMessage}
           ref={o => this.webviewRef = o}
